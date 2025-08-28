@@ -290,9 +290,12 @@ describe('Credit Integration', () => {
 - [ ] **UI feedback**: Credits update after each complete analysis
 
 ### **Business Logic Validation:**
-- [ ] **Plan Starter (49€)**: 100 créditos = 100 análisis completos/mes
+- [ ] **Free**: 3 créditos = 3 análisis (loss leader para conversión)
+- [ ] **Starter (49€)**: 100 créditos = 100 análisis completos/mes (88% margen)
+- [ ] **Pro (99€)**: 300 créditos = 300 análisis completos/mes (83% margen)  
+- [ ] **Agency (199€)**: 800 créditos = 800 análisis completos/mes (77% margen)
 - [ ] **Content generation**: Funcionalidad premium por +1 crédito adicional
-- [ ] **Value proposition**: Usuarios pagan por insights, no por pasos técnicos
+- [ ] **Value proposition**: Volume discounts + usuarios pagan por insights completos
 
 ### **Ready for CS-002:**
 Con CS-001 completo, CS-002 (Credit Purchase) puede implementar:
