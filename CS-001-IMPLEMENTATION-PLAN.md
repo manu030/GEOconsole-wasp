@@ -77,20 +77,23 @@ action consumeCredits {
 
 #### **File**: `src/credit/integration.ts` (NUEVO)
 ```typescript
-// Wrapper functions para APIs externas
-export const withCreditCheck = (operation: string, cost: number) => {
-  // Higher order function que:
-  // 1. Verifica créditos disponibles
-  // 2. Ejecuta la operación  
-  // 3. Consume créditos si es exitosa
+// Wrapper functions para value-based operations
+export const withVisibilityAnalysisCredit = async (userId: string, operation: () => Promise<T>) => {
+  // 1. Verifica que usuario tenga ≥1 crédito disponible
+  // 2. Ejecuta análisis completo (keyword extraction + query + visibility)  
+  // 3. Consume 1 crédito solo si análisis es exitoso
   // 4. Maneja errores con ServiceError
+}
+
+export const withContentGenerationCredit = async (userId: string, operation: () => Promise<T>) => {
+  // Similar pattern para content generation
 }
 ```
 
-**Costos por operación:**
-- DataForSEO Keyword Extraction: 2 créditos
-- DataForSEO Visibility Testing: 3 créditos  
-- OpenRouter Query Generation: 1 crédito
+**Value-Based Credit System:**
+- **Análisis de Visibilidad Completo**: 1 crédito (incluye todo el pipeline)
+- **Content Generation**: 1 crédito adicional (opcional)
+- **Otras operaciones internas**: 0 créditos (no tienen valor directo para usuario)
 
 ### **Paso 5: UI Components (2 horas)**
 
@@ -136,9 +139,12 @@ export const createInsufficientCreditsError = (required: number, available: numb
 ### **Paso 7: Integration Points (1.5 horas)**
 
 #### **Files to UPDATE**:
-1. `src/demo-ai-app/operations.ts` - Envolver operaciones costosas
-2. Cualquier servicio que use DataForSEO/OpenRouter
-3. Añadir `await withCreditCheck('keyword-extraction', 2)` antes de operaciones
+1. **Primary Integration** - Donde se ejecuta el flujo completo de análisis:
+   - Envolver con `await withVisibilityAnalysisCredit(userId, () => fullAnalysisWorkflow())`
+   - Full workflow = keyword extraction + query generation + ChatGPT analysis
+2. **Content Generation** - Donde se genera contenido optimizado:
+   - Envolver con `await withContentGenerationCredit(userId, () => generateOptimizedContent())`
+3. **Internal API calls** - NO consumen créditos (son pasos técnicos internos)
 
 ### **Paso 8: Tests (1.5 horas)**
 
@@ -174,7 +180,7 @@ export const createInsufficientCreditsError = (required: number, available: numb
 | **4. Error Handling** | `src/types/errors.ts`, `src/credit/errors.ts` | 45min | InsufficientCreditsError |
 | **5. UI Components** | `src/components/ui/credit-indicator.tsx` | 1h 30min | Credit display component |
 | **6. UI Integration** | `UserDropdown.tsx` | 30min | Show credits in user dropdown |
-| **7. Service Integration** | Update existing operations | 1h | Wrap costly operations |
+| **7. Service Integration** | Update analysis workflows | 1h | Wrap value operations only |
 | **8. Unit Tests** | `src/credit/*.test.ts` | 1h 15min | Comprehensive test suite |
 
 **Total: 8 horas**
@@ -209,10 +215,14 @@ export const createInsufficientCreditsError = (required: number, available: numb
 
 ### **Decisiones de Diseño:**
 
-1. **Credit Costs:**
-   - DataForSEO Keyword: 2 créditos (operación más costosa)
-   - DataForSEO Visibility: 3 créditos (operación premium) 
-   - OpenRouter Query: 1 crédito (operación básica)
+1. **Credit Costs (Alineado con Value Proposition):**
+   - **Análisis de Visibilidad Completo**: 1 crédito
+     - Incluye: Keyword extraction + Query generation + ChatGPT visibility check
+     - Output: Resultado completo con competitors detectados
+     - Valor usuario: Insight accionable completo
+   - **Content Generation**: 1 crédito adicional
+     - Genera outline + copy optimizado para aparecer en AI
+     - Valor usuario: Contenido listo para implementar
 
 2. **Error Strategy:**
    - Usar ServiceError existente para consistencia
@@ -251,18 +261,18 @@ describe('Credit Operations', () => {
   test('consumeCredits reduces credits correctly')
   test('consumeCredits throws error when insufficient credits') 
   test('hasAvailableCredits validates correctly')
-  test('withCreditCheck prevents operation when insufficient credits')
-  test('withCreditCheck consumes credits after successful operation')
+  test('withVisibilityAnalysisCredit prevents operation when insufficient credits')
+  test('withVisibilityAnalysisCredit consumes 1 credit after successful analysis')
 })
 ```
 
 ### **Integration Tests (4 tests mínimos):**
 ```typescript  
 describe('Credit Integration', () => {
-  test('DataForSEO operation consumes 2 credits')
-  test('OpenRouter operation consumes 1 credit')
-  test('Failed operation does not consume credits')
-  test('UI shows updated credits after consumption')
+  test('Full visibility analysis consumes exactly 1 credit')
+  test('Content generation consumes exactly 1 credit')
+  test('Failed analysis does not consume credits')
+  test('UI shows updated credits after successful operation')
 })
 ```
 
@@ -272,18 +282,23 @@ describe('Credit Integration', () => {
 
 ### **After Implementation:**
 - [ ] **New user flow**: User sees "3 credits remaining"
-- [ ] **Credit consumption**: Credits decrease after operations  
-- [ ] **Quota enforcement**: Operations blocked at 0 credits
-- [ ] **Error handling**: Clear message "Not enough credits"
+- [ ] **Value-based consumption**: 1 crédito = 1 análisis de visibilidad completo  
+- [ ] **Quota enforcement**: Análisis bloqueados at 0 credits
+- [ ] **Clear value messaging**: "Not enough credits for visibility analysis"
 - [ ] **Test coverage**: 100% for credit system
 - [ ] **Performance**: No noticeable slowdown
-- [ ] **UI feedback**: Credits update in real-time
+- [ ] **UI feedback**: Credits update after each complete analysis
+
+### **Business Logic Validation:**
+- [ ] **Plan Starter (49€)**: 100 créditos = 100 análisis completos/mes
+- [ ] **Content generation**: Funcionalidad premium por +1 crédito adicional
+- [ ] **Value proposition**: Usuarios pagan por insights, no por pasos técnicos
 
 ### **Ready for CS-002:**
 Con CS-001 completo, CS-002 (Credit Purchase) puede implementar:
-- Stripe integration para compra de créditos
-- Credit packages (10, 50, 100 credits)
-- Auto-recharge cuando créditos < 2
+- Stripe integration para compra de créditos adicionales
+- Credit packages alineados con value proposition
+- Auto-recharge cuando créditos < 5 (para completar análisis)
 
 ---
 
