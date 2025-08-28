@@ -132,6 +132,12 @@ npm run test:run -- src/services/analysisService.test.ts
 - Performance monitoring
 - Deployment preparation
 
+## 📚 Documentation
+
+- **[📋 ROADMAP.md](./ROADMAP.md)** - Detailed project roadmap and milestones
+- **[🤖 CLAUDE.md](./CLAUDE.md)** - AI development context and technical details
+- **[🧪 Testing Guide](./src/test/)** - Testing infrastructure and strategies
+
 ## 🔧 Development
 
 ### Key Commands
