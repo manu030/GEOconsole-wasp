@@ -135,6 +135,7 @@ npm run test:run -- src/services/analysisService.test.ts
 ## 📚 Documentation
 
 - **[📋 ROADMAP.md](./ROADMAP.md)** - Detailed project roadmap and milestones
+- **[✅ IMPLEMENTATION_CHECKLIST.md](./IMPLEMENTATION_CHECKLIST.md)** - Task checklist and sprint planning
 - **[🤖 CLAUDE.md](./CLAUDE.md)** - AI development context and technical details
 - **[🧪 Testing Guide](./src/test/)** - Testing infrastructure and strategies
 
