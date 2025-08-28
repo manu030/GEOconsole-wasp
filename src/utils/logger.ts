@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import { sanitizeErrorForLogging } from './error-sanitizer';
+
 export interface LogContext {
   service: string;
   operation: string;
@@ -28,9 +31,23 @@ class Logger {
     const timestamp = new Date().toISOString();
     const correlationId = context?.correlationId || 'no-correlation-id';
     
+    // Create a safe copy of context and sanitize errors
+    let safeContext = { ...context };
+    if (context?.error) {
+      const sanitizedError = sanitizeErrorForLogging(context.error, correlationId);
+      safeContext = {
+        ...context,
+        error: sanitizedError.message,
+        errorType: sanitizedError.type,
+        ...(sanitizedError.code && { errorCode: sanitizedError.code }),
+        ...(sanitizedError.stack && { stack: sanitizedError.stack }),
+      };
+      delete safeContext.error; // Remove original error object
+    }
+    
     if (this.isDevelopment) {
       // Human-readable format for development
-      const contextStr = context ? JSON.stringify(context, null, 2) : '';
+      const contextStr = safeContext ? JSON.stringify(safeContext, null, 2) : '';
       return `[${timestamp}] ${level.toUpperCase()} [${correlationId}] ${message}${contextStr ? `\nContext: ${contextStr}` : ''}`;
     } else {
       // Structured JSON for production
@@ -39,7 +56,7 @@ class Logger {
         level: level.toUpperCase(),
         message,
         correlationId,
-        ...context
+        ...safeContext
       });
     }
   }
@@ -101,7 +118,18 @@ export const logger = new Logger();
 
 // Export utility functions
 export const generateCorrelationId = (): string => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // Use Node.js crypto.randomUUID() for proper UUID v4 generation
+  // Falls back to manual UUID generation if not available
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  
+  // Fallback UUID v4 generation
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 };
 
 export const createServiceLogger = (service: string) => {

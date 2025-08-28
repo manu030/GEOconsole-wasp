@@ -13,6 +13,7 @@ import type {
 import * as z from 'zod';
 import { SubscriptionStatus } from '../payment/plans';
 import { ensureArgsSchemaOrThrowHttpError } from '../server/validation';
+import { withContentGenerationCredit } from '../credit/integration';
 import { GeneratedSchedule, TaskPriority } from './schedule';
 
 const openAi = setUpOpenAi();
@@ -40,58 +41,51 @@ export const generateGptResponse: GenerateGptResponse<GenerateGptResponseInput, 
   }
 
   const { hours } = ensureArgsSchemaOrThrowHttpError(generateGptResponseInputSchema, rawArgs);
+
+  // For subscribed users, no credit consumption
+  // For non-subscribed users, use new credit system
+  if (isUserSubscribed(context.user)) {
+    // Direct execution for subscribed users
+    return await executeScheduleGeneration(context.user.id, hours, context);
+  } else {
+    // Use credit system for non-subscribed users
+    return await withContentGenerationCredit(
+      context.user.id,
+      'schedule-generation',
+      () => executeScheduleGeneration(context.user.id, hours, context)
+    );
+  }
+};
+
+// Extracted the actual schedule generation logic
+async function executeScheduleGeneration(
+  userId: string,
+  hours: number,
+  context: any
+): Promise<GeneratedSchedule> {
   const tasks = await context.entities.Task.findMany({
     where: {
-      user: {
-        id: context.user.id,
-      },
+      user: { id: userId },
     },
   });
 
-  console.log('Calling open AI api');
+  console.log('Calling OpenAI API for schedule generation');
   const generatedSchedule = await generateScheduleWithGpt(tasks, hours);
+  
   if (generatedSchedule === null) {
     throw new HttpError(500, 'Encountered a problem in communication with OpenAI');
   }
 
-  const createResponse = context.entities.GptResponse.create({
+  // Save the response
+  await context.entities.GptResponse.create({
     data: {
-      user: { connect: { id: context.user.id } },
+      user: { connect: { id: userId } },
       content: JSON.stringify(generatedSchedule),
     },
   });
 
-  const transactions: PrismaPromise<GptResponse | User>[] = [createResponse];
-
-  // We decrement the credits for users without an active subscription
-  // after using up tokens to get a daily plan from Chat GPT.
-  //
-  // This way, users don't feel cheated if something goes wrong.
-  // On the flipside, users can theoretically abuse this and spend more
-  // credits than they have, but the damage should be pretty limited.
-  //
-  // Think about which option you prefer for your app and edit the code accordingly.
-  if (!isUserSubscribed(context.user)) {
-    if (context.user.credits > 0) {
-      const decrementCredit = context.entities.User.update({
-        where: { id: context.user.id },
-        data: {
-          credits: {
-            decrement: 1,
-          },
-        },
-      });
-      transactions.push(decrementCredit);
-    } else {
-      throw new HttpError(402, 'User has not paid or is out of credits');
-    }
-  }
-
-  console.log('Decrementing credits and saving response');
-  await prisma.$transaction(transactions);
-
   return generatedSchedule;
-};
+}
 
 function isUserSubscribed(user: User) {
   return (

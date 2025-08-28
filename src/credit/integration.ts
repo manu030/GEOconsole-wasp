@@ -2,6 +2,7 @@ import { HttpError, prisma } from 'wasp/server';
 import { createInsufficientCreditsError } from './errors';
 import { logger, generateCorrelationId } from '../utils/logger';
 import { hasAvailableCredits } from './operations';
+import { CREDIT_TRANSACTION_OPTIONS, withDatabaseRetry, withQueryMetrics } from '../utils/database-config';
 
 /**
  * Higher-order function that wraps operations requiring visibility analysis credits
@@ -25,8 +26,8 @@ export const withVisibilityAnalysisCredit = async <T>(
   });
 
   try {
-    // Use transaction to ensure atomic operation: credit check + consumption + actual work
-    const result = await prisma.$transaction(async (tx) => {
+    // Phase 1: Check and reserve credits atomically
+    const creditReservation = await prisma.$transaction(async (tx) => {
       // 1. Check current user credits
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -42,38 +43,67 @@ export const withVisibilityAnalysisCredit = async <T>(
         throw createInsufficientCreditsError(requiredCredits, user.credits, correlationId);
       }
 
-      // 3. Execute the actual operation first
-      logger.info('Executing visibility analysis operation', {
-        service: 'credit',
-        operation: operationName,
-        userId,
-        correlationId
-      });
-
-      const operationResult = await operation();
-
-      // 4. Only consume credits if operation was successful
-      await tx.user.update({
-        where: { id: userId },
+      // 3. Reserve credits by consuming them immediately
+      // This prevents race conditions and ensures credits are consumed even if operation fails
+      const updatedUser = await tx.user.update({
+        where: { 
+          id: userId,
+          credits: { gte: requiredCredits } // Double-check during update
+        },
         data: {
           credits: {
             decrement: requiredCredits
           }
-        }
+        },
+        select: { credits: true }
       });
+
+      if (!updatedUser) {
+        throw createInsufficientCreditsError(requiredCredits, user.credits, correlationId);
+      }
+
+      return {
+        remainingCredits: updatedUser.credits,
+        creditsConsumed: requiredCredits
+      };
+    }, CREDIT_TRANSACTION_OPTIONS);
+
+    logger.info('Credits reserved, executing visibility analysis operation', {
+      service: 'credit',
+      operation: operationName,
+      userId,
+      creditsConsumed: creditReservation.creditsConsumed,
+      remainingCredits: creditReservation.remainingCredits,
+      correlationId
+    });
+
+    // Phase 2: Execute operation (credits already consumed)
+    try {
+      const operationResult = await operation();
 
       logger.info('Visibility analysis completed successfully', {
         service: 'credit',
         operation: operationName,
         userId,
-        creditsConsumed: requiredCredits,
+        creditsConsumed: creditReservation.creditsConsumed,
         correlationId
       });
 
       return operationResult;
-    });
-
-    return result;
+    } catch (operationError) {
+      // Operation failed after credits consumed - this is expected behavior
+      // Credits should be consumed for API calls regardless of success/failure
+      logger.warn('Visibility analysis operation failed after credit consumption', {
+        service: 'credit',
+        operation: operationName,
+        userId,
+        creditsConsumed: creditReservation.creditsConsumed,
+        error: operationError instanceof Error ? operationError.message : String(operationError),
+        correlationId
+      });
+      
+      throw operationError;
+    }
 
   } catch (error) {
     logger.error('Visibility analysis failed', {
@@ -112,8 +142,8 @@ export const withContentGenerationCredit = async <T>(
   });
 
   try {
-    // Use transaction to ensure atomic operation
-    const result = await prisma.$transaction(async (tx) => {
+    // Phase 1: Check and reserve credits atomically
+    const creditReservation = await prisma.$transaction(async (tx) => {
       // 1. Check current user credits
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -129,38 +159,67 @@ export const withContentGenerationCredit = async <T>(
         throw createInsufficientCreditsError(requiredCredits, user.credits, correlationId);
       }
 
-      // 3. Execute the actual operation first
-      logger.info('Executing content generation operation', {
-        service: 'credit',
-        operation: operationName,
-        userId,
-        correlationId
-      });
-
-      const operationResult = await operation();
-
-      // 4. Only consume credits if operation was successful
-      await tx.user.update({
-        where: { id: userId },
+      // 3. Reserve credits by consuming them immediately
+      // This prevents race conditions and ensures credits are consumed even if operation fails
+      const updatedUser = await tx.user.update({
+        where: { 
+          id: userId,
+          credits: { gte: requiredCredits } // Double-check during update
+        },
         data: {
           credits: {
             decrement: requiredCredits
           }
-        }
+        },
+        select: { credits: true }
       });
+
+      if (!updatedUser) {
+        throw createInsufficientCreditsError(requiredCredits, user.credits, correlationId);
+      }
+
+      return {
+        remainingCredits: updatedUser.credits,
+        creditsConsumed: requiredCredits
+      };
+    }, CREDIT_TRANSACTION_OPTIONS);
+
+    logger.info('Credits reserved, executing content generation operation', {
+      service: 'credit',
+      operation: operationName,
+      userId,
+      creditsConsumed: creditReservation.creditsConsumed,
+      remainingCredits: creditReservation.remainingCredits,
+      correlationId
+    });
+
+    // Phase 2: Execute operation (credits already consumed)
+    try {
+      const operationResult = await operation();
 
       logger.info('Content generation completed successfully', {
         service: 'credit',
         operation: operationName,
         userId,
-        creditsConsumed: requiredCredits,
+        creditsConsumed: creditReservation.creditsConsumed,
         correlationId
       });
 
       return operationResult;
-    });
-
-    return result;
+    } catch (operationError) {
+      // Operation failed after credits consumed - this is expected behavior
+      // Credits should be consumed for API calls regardless of success/failure
+      logger.warn('Content generation operation failed after credit consumption', {
+        service: 'credit',
+        operation: operationName,
+        userId,
+        creditsConsumed: creditReservation.creditsConsumed,
+        error: operationError instanceof Error ? operationError.message : String(operationError),
+        correlationId
+      });
+      
+      throw operationError;
+    }
 
   } catch (error) {
     logger.error('Content generation failed', {

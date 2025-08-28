@@ -30,6 +30,9 @@ model User {
   @@index([subscriptionStatus])
   @@index([isAdmin])
   @@index([paymentProcessorUserId])
+  @@index([id, credits]) // Optimized for credit checks and consumption
+  @@index([subscriptionStatus, credits]) // Optimized for subscription + credit queries
+  @@index([credits]) // Direct credit lookups for reporting/analytics
 }
 
 model GptResponse {

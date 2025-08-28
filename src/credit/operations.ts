@@ -4,11 +4,11 @@ import { type GetUserCredits, type ConsumeCredits } from 'wasp/server/operations
 import * as z from 'zod';
 import { ensureArgsSchemaOrThrowHttpError } from '../server/validation';
 import { createInsufficientCreditsError } from './errors';
-import { logger } from '../utils/logger';
+import { logger, generateCorrelationId } from '../utils/logger';
 
 // Input schema for getUserCredits
 const getUserCreditsInputSchema = z.object({
-  userId: z.string().nonempty().optional(), // Optional - if not provided, use context.user.id
+  userId: z.string().nonempty().max(36).regex(/^[a-zA-Z0-9-]+$/, 'User ID must be a valid UUID format').optional(), // Optional - if not provided, use context.user.id, validate UUID format
 });
 
 type GetUserCreditsInput = z.infer<typeof getUserCreditsInputSchema>;
@@ -38,7 +38,7 @@ export const getUserCredits: GetUserCredits<GetUserCreditsInput, GetUserCreditsO
     throw new HttpError(403, 'You can only access your own credit information');
   }
 
-  const correlationId = `get-credits-${Date.now()}`;
+  const correlationId = generateCorrelationId();
   
   try {
     const user = await context.entities.User.findUnique({
@@ -78,9 +78,9 @@ export const getUserCredits: GetUserCredits<GetUserCreditsInput, GetUserCreditsO
 
 // Input schema for consumeCredits
 const consumeCreditsInputSchema = z.object({
-  userId: z.string().nonempty().optional(), // Optional - if not provided, use context.user.id
-  amount: z.number().int().positive(),
-  operation: z.string().nonempty(), // Description of what operation consumed the credits
+  userId: z.string().nonempty().max(36).optional(), // Optional - if not provided, use context.user.id, max 36 chars for UUID
+  amount: z.number().int().positive().max(100), // Maximum 100 credits per operation to prevent abuse
+  operation: z.string().nonempty().max(200).regex(/^[a-zA-Z0-9_-]+$/, 'Operation name must contain only alphanumeric characters, hyphens, and underscores'), // Sanitized operation names
 });
 
 type ConsumeCreditsInput = z.infer<typeof consumeCreditsInputSchema>;
@@ -111,7 +111,7 @@ export const consumeCredits: ConsumeCredits<ConsumeCreditsInput, ConsumeCreditsO
     throw new HttpError(403, 'You can only consume your own credits');
   }
 
-  const correlationId = `consume-credits-${Date.now()}`;
+  const correlationId = generateCorrelationId();
 
   try {
     // Use transaction to ensure atomic credit consumption
