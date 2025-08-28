@@ -182,6 +182,18 @@ query getAllTasksByUser {
 }
 //#endregion
 
+//#region Credit System
+query getUserCredits {
+  fn: import { getUserCredits } from "@src/credit/operations",
+  entities: [User]
+}
+
+action consumeCredits {
+  fn: import { consumeCredits } from "@src/credit/operations",
+  entities: [User]
+}
+//#endregion
+
 //#region Payment
 route PricingPageRoute { path: "/pricing", to: PricingPage }
 page PricingPage {

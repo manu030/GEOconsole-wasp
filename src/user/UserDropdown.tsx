@@ -7,8 +7,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+import { CreditIndicator } from '../components/ui/credit-indicator';
 import { userMenuItems } from './constants';
 
 export function UserDropdown({ user }: { user: Partial<UserEntity> }) {
@@ -26,6 +28,23 @@ export function UserDropdown({ user }: { user: Partial<UserEntity> }) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        {/* Credit indicator - always show for authenticated users */}
+        {user && typeof user.credits === 'number' && (
+          <>
+            <div className="px-2 py-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Credits</span>
+                <CreditIndicator 
+                  currentCredits={user.credits}
+                  showDetails={false}
+                  size="sm"
+                />
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
         {userMenuItems.map((item) => {
           if (item.isAuthRequired && !user) return null;
           if (item.isAdminOnly && (!user || !user.isAdmin)) return null;
