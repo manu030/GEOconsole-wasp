@@ -50,9 +50,9 @@ export const generateGptResponse: GenerateGptResponse<GenerateGptResponseInput, 
   } else {
     // Use credit system for non-subscribed users
     return await withContentGenerationCredit(
-      context.user.id,
+      context.user!.id,
       'schedule-generation',
-      () => executeScheduleGeneration(context.user.id, hours, context)
+      () => executeScheduleGeneration(context.user!.id, hours, context)
     );
   }
 };

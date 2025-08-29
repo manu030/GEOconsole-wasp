@@ -43,7 +43,7 @@ export const getUserCredits: GetUserCredits<GetUserCreditsInput, GetUserCreditsO
   try {
     const user = await context.entities.User.findUnique({
       where: { id: targetUserId },
-      select: { id: true, credits: true, updatedAt: true }
+      select: { id: true, credits: true, createdAt: true }
     });
 
     if (!user) {
@@ -61,7 +61,7 @@ export const getUserCredits: GetUserCredits<GetUserCreditsInput, GetUserCreditsO
     return {
       userId: user.id,
       credits: user.credits,
-      lastUpdated: user.updatedAt
+      lastUpdated: user.createdAt
     };
 
   } catch (error) {
@@ -70,7 +70,7 @@ export const getUserCredits: GetUserCredits<GetUserCreditsInput, GetUserCreditsO
       operation: 'getUserCredits',
       userId: targetUserId,
       correlationId,
-      error
+      error: error instanceof Error ? error.message : String(error)
     });
     throw error;
   }
@@ -170,7 +170,7 @@ export const consumeCredits: ConsumeCredits<ConsumeCreditsInput, ConsumeCreditsO
       requestedAmount: amount,
       operationDescription: operation,
       correlationId,
-      error
+      error: error instanceof Error ? error.message : String(error)
     });
     throw error;
   }

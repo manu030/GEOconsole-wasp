@@ -1,6 +1,6 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '../../lib/utils';
+import { Badge } from './badge';
 
 export interface CreditIndicatorProps {
   currentCredits: number;

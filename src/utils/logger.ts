@@ -93,20 +93,20 @@ class Logger {
       error: childLogger.error.bind(childLogger)
     };
 
-    childLogger.debug = (message: string, context?: LogContext) => {
-      originalMethods.debug(message, { ...baseContext, ...context });
+    childLogger.debug = (message: string, context?: Partial<LogContext>) => {
+      originalMethods.debug(message, { ...baseContext, ...context } as LogContext);
     };
 
-    childLogger.info = (message: string, context?: LogContext) => {
-      originalMethods.info(message, { ...baseContext, ...context });
+    childLogger.info = (message: string, context?: Partial<LogContext>) => {
+      originalMethods.info(message, { ...baseContext, ...context } as LogContext);
     };
 
-    childLogger.warn = (message: string, context?: LogContext) => {
-      originalMethods.warn(message, { ...baseContext, ...context });
+    childLogger.warn = (message: string, context?: Partial<LogContext>) => {
+      originalMethods.warn(message, { ...baseContext, ...context } as LogContext);
     };
 
-    childLogger.error = (message: string, context?: LogContext) => {
-      originalMethods.error(message, { ...baseContext, ...context });
+    childLogger.error = (message: string, context?: Partial<LogContext>) => {
+      originalMethods.error(message, { ...baseContext, ...context } as LogContext);
     };
 
     return childLogger;

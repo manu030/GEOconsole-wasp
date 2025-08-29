@@ -1,38 +1,84 @@
 #!/bin/bash
 
-echo "🚀 Preparando deployment para Railway..."
+# Railway deployment script for Wasp application
+set -e
 
-# Build Wasp localmente
-echo "📦 Building Wasp project..."
+echo "🚀 Starting Railway deployment preparation..."
+
+# Build the Wasp application
+echo "📦 Building Wasp application..."
 wasp build
 
-# Crear package.json para el servidor si no existe
-if [ ! -f ".wasp/build/server/package.json" ]; then
-    echo "❌ Error: Build failed or server directory not found"
-    exit 1
-fi
-
-# Añadir script de start si no existe
+# Navigate to server build directory
 cd .wasp/build/server
-if ! grep -q '"start"' package.json; then
-    echo "📝 Adding start script to server package.json..."
-    npm pkg set scripts.start="node app.js"
-fi
 
-# Commitear el build (temporalmente)
-cd ../../..
-echo "📤 Preparing build for deployment..."
-git add -f .wasp/build/
-git commit -m "Add production build for Railway deployment (temporary)"
+# Create railway.json configuration
+echo "⚙️ Creating Railway configuration..."
+cat > railway.json << EOF
+{
+  "build": {
+    "builder": "DOCKERFILE"
+  },
+  "deploy": {
+    "startCommand": "npm run start-production",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}
+EOF
 
-echo "🎯 Ready to push! Run: git push"
+# Create a production-ready Dockerfile
+echo "🐳 Creating production Dockerfile..."
+cat > Dockerfile << 'EOF'
+FROM node:22-slim
+
+WORKDIR /app
+
+# Install OpenSSL and other dependencies
+RUN apt-get update -y && \
+    apt-get install -y openssl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy package files
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY rollup.config.js ./
+
+# Install ALL dependencies (including dev for build)
+RUN npm ci
+
+# Copy source files
+COPY src ./src
+COPY .env* ./
+
+# Copy Prisma files
+COPY ../db ../db
+
+# Generate Prisma client
+RUN npx prisma generate --schema=../db/schema.prisma
+
+# Build the application
+RUN npm run bundle
+
+# Remove dev dependencies after build
+RUN npm prune --production
+
+# Expose port
+EXPOSE 3000
+
+# Production start command
+CMD ["npm", "run", "start-production"]
+EOF
+
+echo "✅ Railway deployment files created!"
 echo ""
-echo "⚠️  IMPORTANTE en Railway:"
-echo "1. Cambia Root Directory a: .wasp/build/server"
-echo "2. Build Command: npm ci && npx prisma generate"
-echo "3. Start Command: npm start"
+echo "📋 Next steps:"
+echo "1. Deploy to Railway: cd .wasp/build/server && railway up"
+echo "2. Set environment variables in Railway dashboard"
+echo "3. Connect your database"
 echo ""
-echo "Para el frontend, crea otro servicio con:"
-echo "- Root Directory: .wasp/build/web-app"
-echo "- Build Command: npm ci && npm run build"
-echo "- Start Command: npm start"
+echo "🔑 Required environment variables:"
+echo "   - DATABASE_URL"
+echo "   - JWT_SECRET"
+echo "   - WASP_WEB_CLIENT_URL"
+echo "   - WASP_SERVER_URL"

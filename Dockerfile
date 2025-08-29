@@ -7,14 +7,17 @@ RUN apt-get update -y && \
     apt-get install -y openssl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy entire server build directory
+# Copy entire server build directory (already compiled by Wasp)
 COPY .wasp/build/server ./
 
 # Copy database schema
 COPY .wasp/build/db ../db
 
-# Install all dependencies (including dev for building)
-RUN npm ci --include=dev
+# Copy the pre-built bundle
+COPY .wasp/build/server/bundle ./bundle
+
+# Install ONLY production dependencies
+RUN npm ci --omit=dev
 
 # Generate Prisma client
 RUN npx prisma generate --schema=../db/schema.prisma
@@ -22,5 +25,5 @@ RUN npx prisma generate --schema=../db/schema.prisma
 # Expose port
 EXPOSE 3000
 
-# Build the bundle and start (override package.json start script)
-CMD ["sh", "-c", "npm run bundle && npm run start-production"]
+# Start the application directly (no build needed)
+CMD ["npm", "run", "start-production"]
