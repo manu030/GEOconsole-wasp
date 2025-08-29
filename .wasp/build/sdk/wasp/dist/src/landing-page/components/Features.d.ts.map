@@ -1,0 +1,1 @@
+{"version":3,"file":"Features.d.ts","sourceRoot":"","sources":["../../../../src/landing-page/components/Features.tsx"],"names":[],"mappings":"AAEA,MAAM,WAAW,OAAO;IACtB,IAAI,EAAE,MAAM,CAAC;IACb,WAAW,EAAE,MAAM,CAAC;IACpB,IAAI,EAAE,MAAM,CAAC;IACb,IAAI,EAAE,MAAM,CAAC;CACd;AAED,MAAM,CAAC,OAAO,UAAU,QAAQ,CAAC,EAAE,QAAQ,EAAE,EAAE;IAAE,QAAQ,EAAE,OAAO,EAAE,CAAA;CAAE,+BA4BrE"}

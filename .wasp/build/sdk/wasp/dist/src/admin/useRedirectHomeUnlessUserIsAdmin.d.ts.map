@@ -1,0 +1,1 @@
+{"version":3,"file":"useRedirectHomeUnlessUserIsAdmin.d.ts","sourceRoot":"","sources":["../../../src/admin/useRedirectHomeUnlessUserIsAdmin.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,QAAQ,EAAE,MAAM,WAAW,CAAC;AAI1C,wBAAgB,gCAAgC,CAAC,EAAE,IAAI,EAAE,EAAE;IAAE,IAAI,EAAE,QAAQ,CAAA;CAAE,QAQ5E"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"useEmail.d.ts","sourceRoot":"","sources":["../../../../../auth/forms/internal/email/useEmail.ts"],"names":[],"mappings":"AAIA,wBAAgB,QAAQ,CAAC,EACvB,OAAO,EACP,4BAA4B,EAC5B,cAAc,EACd,OAAO,GACR,EAAE;IACD,OAAO,EAAE,CAAC,KAAK,EAAE,KAAK,KAAK,IAAI,CAAA;IAC/B,4BAA4B,EAAE,MAAM,IAAI,CAAA;IACxC,cAAc,EAAE,MAAM,IAAI,CAAA;IAC1B,OAAO,EAAE,OAAO,CAAA;CACjB;;EAkBA"}

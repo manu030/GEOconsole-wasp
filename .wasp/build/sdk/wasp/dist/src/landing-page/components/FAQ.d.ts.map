@@ -1,0 +1,1 @@
+{"version":3,"file":"FAQ.d.ts","sourceRoot":"","sources":["../../../../src/landing-page/components/FAQ.tsx"],"names":[],"mappings":"AAEA,UAAU,GAAG;IACX,EAAE,EAAE,MAAM,CAAC;IACX,QAAQ,EAAE,MAAM,CAAC;IACjB,MAAM,EAAE,MAAM,CAAC;IACf,IAAI,CAAC,EAAE,MAAM,CAAC;CACf;AAED,MAAM,CAAC,OAAO,UAAU,GAAG,CAAC,EAAE,IAAI,EAAE,EAAE;IAAE,IAAI,EAAE,GAAG,EAAE,CAAA;CAAE,+BAmCpD"}
