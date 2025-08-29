@@ -1,0 +1,41 @@
+{
+  "name": "server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "comment-filip": "The server.js location changed because we have now included client source files above .wasp/out/server/src.",
+  "scripts": {
+    "bundle": "tsc --build && rollup --config --silent",
+    "start": "node --enable-source-maps -r dotenv/config bundle/server.js",
+    "bundle-and-start": "npm run bundle && npm run start",
+    "watch": "nodemon --exec 'npm run bundle-and-start || exit 1'",
+    "db-seed": "npm run bundle && node --enable-source-maps -r dotenv/config bundle/dbSeed.js",
+    "db-migrate-prod": "prisma migrate deploy --schema=../db/schema.prisma",
+    "start-production": "npm run db-migrate-prod && NODE_ENV=production npm run start"
+  },
+  "nodemonConfig": {
+    "delay": "1000"
+  },
+  "engineStrict": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "prisma": {"seed":"npm run db-seed"},
+  "dependencies": {"cookie-parser": "~1.4.6",
+  "cors": "^2.8.5",
+  "dotenv": "^16.0.2",
+  "express": "~5.1.0",
+  "helmet": "^6.0.0",
+  "morgan": "~1.10.0",
+  "superjson": "^2.2.1"
+},
+  "devDependencies": {"@rollup/plugin-node-resolve": "^16.0.0",
+  "@tsconfig/node20": "latest",
+  "@types/cors": "^2.8.5",
+  "@types/express-serve-static-core": "^5.0.0",
+  "@types/node": "^20.0.0",
+  "nodemon": "^2.0.19",
+  "rollup": "^4.9.6",
+  "rollup-plugin-esbuild": "^6.1.1"
+}
+}
