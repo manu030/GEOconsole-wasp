@@ -1318,13 +1318,6 @@
     [
         [
             "file",
-            "../out/sdk/wasp/src/components/ui/credit-indicator.test.tsx"
-        ],
-        "01cd728d2766c761c72f8235913b2ab431d892469051b62c3a0069fa016457d2"
-    ],
-    [
-        [
-            "file",
             "../out/sdk/wasp/src/components/ui/credit-indicator.tsx"
         ],
         "c24e782449f45f7eeb7d95708334220c946a4d42a98e650fe6073b6ffaabbac7"
@@ -1409,13 +1402,6 @@
     [
         [
             "file",
-            "../out/sdk/wasp/src/credit/integration.test.ts"
-        ],
-        "ec266198b0aff4bebe1c1668db9d4ac7a02fccee68ba0dd94f860f2d608d6268"
-    ],
-    [
-        [
-            "file",
             "../out/sdk/wasp/src/credit/integration.ts"
         ],
         "0561019e8d41f91a5f5858564755ec1e63f84377c593451814726d32ba5e73d9"
@@ -1423,16 +1409,9 @@
     [
         [
             "file",
-            "../out/sdk/wasp/src/credit/operations.test.ts"
-        ],
-        "d3d76a70c254c32c95823a935445a939b62a01c575ef6271c5641bb1866b4ec8"
-    ],
-    [
-        [
-            "file",
             "../out/sdk/wasp/src/credit/operations.ts"
         ],
-        "d0e5f0cc5ff05b1439054e9e5e3921a181d6e243ff5335b536307a24730161e8"
+        "904d4eff7cb942a4cb70025804d611990ee737f64497fd6c9f25b3793f8b448f"
     ],
     [
         [
@@ -1446,7 +1425,7 @@
             "file",
             "../out/sdk/wasp/src/demo-ai-app/operations.ts"
         ],
-        "cbf29a038b03ae10d4bb8597d13eba53e347e49c6fe354cc7112bbec9250f03e"
+        "510f565c030cfe310b4182ca057127c61a9fcd65ef37a9193e1c958a880a2c35"
     ],
     [
         [
@@ -1857,16 +1836,9 @@
     [
         [
             "file",
-            "../out/sdk/wasp/src/utils/logger.test.ts"
-        ],
-        "c4c52e01daaf85dde35b50289b9236e7cda56048e9838e9255e74ecdf7c0d600"
-    ],
-    [
-        [
-            "file",
             "../out/sdk/wasp/src/utils/logger.ts"
         ],
-        "a1ffcf58462a925ccc5d9cf34cebaba71674caf86f1b8b1006a3c0dc7bc16afa"
+        "1198345ec96eb9c82f611c0231de919d4239ab476af665fe840988a5deb7f43a"
     ],
     [
         [
