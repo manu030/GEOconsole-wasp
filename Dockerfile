@@ -13,17 +13,20 @@ COPY .wasp/build/server ./
 # Copy database schema
 COPY .wasp/build/db ../db
 
-# Copy the pre-built bundle
-COPY .wasp/build/server/bundle ./bundle
-
-# Install ONLY production dependencies
-RUN npm ci --omit=dev
+# Install ALL dependencies temporarily for building
+RUN npm ci
 
 # Generate Prisma client
 RUN npx prisma generate --schema=../db/schema.prisma
 
+# Build the bundle
+RUN npm run bundle
+
+# Remove dev dependencies after build
+RUN npm prune --production
+
 # Expose port
 EXPOSE 3000
 
-# Start the application directly (no build needed)
+# Start the application directly
 CMD ["npm", "run", "start-production"]
