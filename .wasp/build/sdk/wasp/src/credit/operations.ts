@@ -70,7 +70,7 @@ export const getUserCredits: GetUserCredits<GetUserCreditsInput, GetUserCreditsO
       operation: 'getUserCredits',
       userId: targetUserId,
       correlationId,
-      error
+      error: error instanceof Error ? error.message : String(error)
     });
     throw error;
   }
@@ -170,7 +170,7 @@ export const consumeCredits: ConsumeCredits<ConsumeCreditsInput, ConsumeCreditsO
       requestedAmount: amount,
       operationDescription: operation,
       correlationId,
-      error
+      error: error instanceof Error ? error.message : String(error)
     });
     throw error;
   }

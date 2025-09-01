@@ -1,5 +1,59 @@
-node_modules
-.npm
-.cache
+# Build outputs (these will be generated during Docker build)
+.wasp/
+dist/
+build/
+
+# Dependencies (will be installed during build)
+node_modules/
+.npm/
+
+# Development files
+.env.local
+.env.development
 *.log
-.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Version control
+.git/
+.gitignore
+
+# Documentation and non-essential files
+docs/
+*.md
+ROADMAP.md
+IMPLEMENTATION_CHECKLIST.md
+PRICING_STRUCTURE.md
+CLAUDE.md
+CS-001-IMPLEMENTATION-PLAN.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Testing files and directories
+coverage/
+.nyc_output/
+src/test/
+**/*.test.*
+**/*.spec.*
+
+# Deployment scripts (not needed in container)
+deploy-railway.sh
+
+# Temporary files
+tmp/
+temp/

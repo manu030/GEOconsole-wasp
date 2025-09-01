@@ -46,7 +46,7 @@ export const getUserCredits = async (rawArgs, context) => {
             operation: 'getUserCredits',
             userId: targetUserId,
             correlationId,
-            error
+            error: error instanceof Error ? error.message : String(error)
         });
         throw error;
     }
@@ -120,7 +120,7 @@ export const consumeCredits = async (rawArgs, context) => {
             requestedAmount: amount,
             operationDescription: operation,
             correlationId,
-            error
+            error: error instanceof Error ? error.message : String(error)
         });
         throw error;
     }
