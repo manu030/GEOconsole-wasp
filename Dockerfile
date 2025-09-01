@@ -1,15 +1,13 @@
 # Multi-stage build for Wasp application
-FROM node:22-slim AS wasp-builder
+FROM --platform=linux/amd64 node:22-slim AS wasp-builder
 
 # Install system dependencies including Wasp CLI
 RUN apt-get update -y && \
     apt-get install -y curl openssl && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Wasp CLI
-RUN curl -sSL https://get.wasp-lang.dev/installer.sh | sh
-
-# Add Wasp to PATH
+# Install Wasp CLI and add to PATH
+RUN curl -sSL https://get.wasp.sh/installer.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /build
@@ -40,11 +38,13 @@ RUN npm ci
 
 # Copy server source and database schema
 COPY --from=wasp-builder /build/.wasp/build/server/src ./src
-COPY --from=wasp-builder /build/.wasp/build/db ../db
+COPY --from=wasp-builder /build/.wasp/build/db ./db
 
 # Install Prisma client and CLI, then generate client
 RUN npm install @prisma/client@5.19.1 prisma@5.19.1
-RUN PRISMA_SKIP_POSTINSTALL_GENERATE=true npx prisma generate --schema=../db/schema.prisma
+
+# Generate Prisma client with proper working directory context
+RUN npx prisma generate --schema=./db/schema.prisma
 
 # Build the server bundle (TypeScript compilation + Rollup)
 RUN npm run bundle
