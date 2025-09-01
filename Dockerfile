@@ -59,19 +59,14 @@ RUN echo "=== DEBUGGING FILE STRUCTURE ===" && \
     head -15 src/routes/apis/index.ts
 
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
-RUN find src -name "*.ts" -exec sh -c '
-    file="$1"
-    # Count directory depth from /app/src/
-    depth=$(echo "$file" | grep -o "/" | wc -l)
-    depth=$((depth - 1))  # Subtract 1 because we start from src/
-    
-    # Create the proper relative path (depth + 1 levels up to get to /app, then user-src)
-    prefix=""
-    for i in $(seq 1 $((depth + 1))); do prefix="${prefix}../"; done
-    
-    # Replace the import paths
-    sed -i "s|\\.\\./.*src/|${prefix}user-src/|g" "$file"
-    echo "Fixed imports in $file (depth: $depth, prefix: $prefix)"
+RUN find src -name "*.ts" -exec sh -c '\
+    file="$1"; \
+    depth=$(echo "$file" | grep -o "/" | wc -l); \
+    depth=$((depth - 1)); \
+    prefix=""; \
+    for i in $(seq 1 $((depth + 1))); do prefix="${prefix}../"; done; \
+    sed -i "s|\\.\\./.*src/|${prefix}user-src/|g" "$file"; \
+    echo "Fixed imports in $file (depth: $depth, prefix: $prefix)"; \
 ' sh {} \;
 
 # Debug: Verify imports were fixed and check file resolution
