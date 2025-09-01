@@ -522,7 +522,7 @@
             "file",
             "../out/sdk/wasp/server/api/index.ts"
         ],
-        "7c16933f9c23fb61d87ba9894c9ee3c6feb87bf2841b7c06fe44cfa46588b533"
+        "e87dbd585d0d427a4d93a8199bca3c7bfa03e71785043b7f11504b2dbf144990"
     ],
     [
         [
@@ -746,7 +746,7 @@
             "file",
             "../out/sdk/wasp/src/.DS_Store"
         ],
-        "61e7029574885b66f907806943c6ebde1ad85314c5cd2688919460c9e536c306"
+        "125d0600519267fb99c0b3a281277af3cb0e05e9814bc83afa780077944fc956"
     ],
     [
         [
@@ -1269,6 +1269,13 @@
     [
         [
             "file",
+            "../out/sdk/wasp/src/components/.DS_Store"
+        ],
+        "bded2e111b61927cf937b375174a745df5097493d6856b5ececa1130463c29ef"
+    ],
+    [
+        [
+            "file",
             "../out/sdk/wasp/src/components/ui/accordion.tsx"
         ],
         "06113cdd1d7956e3103d20d8850326abe1a064853bbb3252c9b839e13443dba3"
@@ -1425,7 +1432,7 @@
             "file",
             "../out/sdk/wasp/src/demo-ai-app/operations.ts"
         ],
-        "510f565c030cfe310b4182ca057127c61a9fcd65ef37a9193e1c958a880a2c35"
+        "6885981c67a5ac8fc7078355b4955344a820351090eb72ce46483120670fe8a5"
     ],
     [
         [
@@ -1468,6 +1475,13 @@
             "../out/sdk/wasp/src/file-upload/validation.ts"
         ],
         "97640238a0c449f62b2201df0f81d327e4f6b0d1b893794f31f15e5d36a7ecd2"
+    ],
+    [
+        [
+            "file",
+            "../out/sdk/wasp/src/health/health.ts"
+        ],
+        "9493001e34272939ed4e0bad0b4044c08177442857bd8f500b135f005a3105b8"
     ],
     [
         [
@@ -1908,7 +1922,7 @@
             "file",
             "Dockerfile"
         ],
-        "a5086d0267047205b727e64ee4946efd3d11bf9447aa9de575810df1f1e518e0"
+        "915dce4933965936b48a3c9e9420345f77a799993f22abd10102e21c64bd7031"
     ],
     [
         [
@@ -2181,7 +2195,7 @@
             "file",
             "server/src/routes/apis/index.ts"
         ],
-        "addc6c12a339cd316ca2152ca9a6e97dbfd14adf0daf3622562cd6d6a8634173"
+        "8f4ebc8f00cba66ac59851b7953eed9d45288e10088bf11e42dfd844ade485f2"
     ],
     [
         [

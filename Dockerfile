@@ -49,15 +49,6 @@ COPY --from=wasp-builder /build/.wasp/build/db ./db
 # Copy user source files and fix the import path in the generated job file
 COPY --from=wasp-builder /build/src ./user-src
 
-# Debug: Check file structure before fixing imports
-RUN echo "=== DEBUGGING FILE STRUCTURE ===" && \
-    echo "Contents of /app:" && ls -la && \
-    echo "Contents of /app/src:" && ls -la src/ && \
-    echo "Contents of /app/user-src:" && ls -la user-src/ && \
-    echo "Looking for webhook file:" && find . -name "*webhook*" -type f && \
-    echo "=== GENERATED FILE CONTENT ===" && \
-    head -15 src/routes/apis/index.ts
-
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
     file="$1"; \
@@ -66,15 +57,7 @@ RUN find src -name "*.ts" -exec sh -c '\
     prefix=""; \
     for i in $(seq 1 $((depth + 1))); do prefix="${prefix}../"; done; \
     sed -i "s|\\.\\./.*src/|${prefix}user-src/|g" "$file"; \
-    echo "Fixed imports in $file (depth: $depth, prefix: $prefix)"; \
 ' sh {} \;
-
-# Debug: Verify imports were fixed and check file resolution
-RUN echo "=== AFTER IMPORT FIX ===" && \
-    echo "Updated import in apis/index.ts:" && \
-    head -15 src/routes/apis/index.ts && \
-    echo "Checking if webhook file exists at expected path:" && \
-    ls -la user-src/payment/ 2>/dev/null || echo "user-src/payment/ directory not found"
 
 # Install Prisma client and CLI, then generate client
 RUN npm install @prisma/client@5.19.1 prisma@5.19.1
@@ -96,7 +79,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+    CMD curl -f http://localhost:3000/ || exit 1
 
 # Start the application
 CMD ["npm", "run", "start-production"]

@@ -222,6 +222,13 @@ api paymentsWebhook {
   middlewareConfigFn: import { paymentsMiddlewareConfigFn } from "@src/payment/webhook",
   httpRoute: (POST, "/payments-webhook")
 }
+
+api healthCheck {
+  fn: import { healthCheck } from "@src/health/health",
+  entities: [],
+  middlewareConfigFn: import { healthMiddlewareConfigFn } from "@src/health/health",
+  httpRoute: (GET, "/api/health")
+}
 //#endregion
 
 //#region File Upload

@@ -4,14 +4,17 @@ import * as z from 'zod';
 import { SubscriptionStatus } from '../payment/plans';
 import { ensureArgsSchemaOrThrowHttpError } from '../server/validation';
 import { withContentGenerationCredit } from '../credit/integration';
-const openAi = setUpOpenAi();
-function setUpOpenAi() {
-    if (process.env.OPENAI_API_KEY) {
-        return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let openAi = null;
+function getOpenAi() {
+    if (!openAi) {
+        if (process.env.OPENAI_API_KEY) {
+            openAi = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        }
+        else {
+            throw new HttpError(500, 'OpenAI API key is not configured. Please contact the administrator.');
+        }
     }
-    else {
-        throw new Error('OpenAI API key is not set');
-    }
+    return openAi;
 }
 //#region Actions
 const generateGptResponseInputSchema = z.object({
@@ -151,7 +154,7 @@ async function generateScheduleWithGpt(tasks, hours) {
         description,
         time,
     }));
-    const completion = await openAi.chat.completions.create({
+    const completion = await getOpenAi().chat.completions.create({
         model: 'gpt-3.5-turbo', // you can use any model here, e.g. 'gpt-3.5-turbo', 'gpt-4', etc.
         messages: [
             {
