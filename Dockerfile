@@ -50,8 +50,11 @@ COPY --from=wasp-builder /build/.wasp/build/db ./db
 # Copy user source files and fix the import path in the generated job file
 COPY --from=wasp-builder /build/src ./user-src
 
-# Copy Wasp SDK modules that are needed at runtime
+# Copy Wasp SDK package with all dependencies
 COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./node_modules/wasp
+
+# Install wasp package locally from the copied files
+RUN npm install ./node_modules/wasp --no-save
 
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
