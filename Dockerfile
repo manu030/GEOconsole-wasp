@@ -43,13 +43,16 @@ COPY --from=wasp-builder /build/.wasp/build/db ./db
 # Install Prisma client and CLI, then generate client
 RUN npm install @prisma/client@5.19.1 prisma@5.19.1
 
+# Install TypeScript for build process
+RUN npm install -D typescript@5.8.2
+
 # Generate Prisma client with proper working directory context
 RUN npx prisma generate --schema=./db/schema.prisma
 
 # Build the server bundle (TypeScript compilation + Rollup)
 RUN npm run bundle
 
-# Clean up dev dependencies
+# Clean up dev dependencies (after build is complete)
 RUN npm prune --production
 
 # Expose port
