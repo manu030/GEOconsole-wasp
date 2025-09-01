@@ -50,8 +50,8 @@ COPY --from=wasp-builder /build/.wasp/build/db ./db
 # Copy user source files and fix the import path in the generated job file
 COPY --from=wasp-builder /build/src ./user-src
 
-# Note: Wasp bundle is self-contained and includes all necessary dependencies
-# No need to copy or install wasp package - everything is compiled into bundle/server.js
+# Copy Wasp SDK package for runtime (bundle contains imports that need resolution)
+COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./node_modules/wasp
 
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
