@@ -36,8 +36,9 @@ COPY --from=wasp-builder /build/.wasp/build/server/rollup.config.js ./
 # Copy root tsconfig.json for project references
 COPY --from=wasp-builder /build/tsconfig.json /tsconfig.json
 
-# Create a working directory structure and modify package.json to skip tsc --build
-RUN sed -i 's/"bundle": "tsc --build && rollup --config --silent"/"bundle": "rollup --config --silent"/g' package.json
+# Create a working directory structure and modify package.json to skip tsc --build and fix schema path
+RUN sed -i 's/"bundle": "tsc --build && rollup --config --silent"/"bundle": "rollup --config --silent"/g' package.json && \
+    sed -i 's/"prisma migrate deploy --schema=..\/db\/schema.prisma"/"prisma migrate deploy --schema=.\/db\/schema.prisma"/g' package.json
 
 # Install dependencies (including devDependencies for build process)
 RUN npm ci
