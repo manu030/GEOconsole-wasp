@@ -53,19 +53,28 @@ COPY --from=wasp-builder /build/src ./user-src
 # Copy Wasp SDK package for runtime (bundle contains imports that need resolution)
 COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./node_modules/wasp
 
-# Debug: Verify wasp package structure and permissions
-RUN echo "=== Debugging wasp package structure ===" && \
-    ls -la ./node_modules/ && \
-    echo "--- wasp directory contents ---" && \
-    ls -la ./node_modules/wasp/ && \
-    echo "--- wasp package.json exists? ---" && \
-    test -f ./node_modules/wasp/package.json && echo "package.json exists" || echo "package.json MISSING" && \
-    echo "--- wasp package.json contents ---" && \
-    cat ./node_modules/wasp/package.json | head -20 && \
-    echo "--- wasp dist directory ---" && \
-    ls -la ./node_modules/wasp/dist/ 2>/dev/null || echo "dist directory missing" && \
-    echo "--- wasp src directory ---" && \
-    ls -la ./node_modules/wasp/src/ 2>/dev/null || echo "src directory missing"
+# Fix wasp package.json by adding missing export paths that are imported by the generated code
+RUN cd ./node_modules/wasp && \
+    cp package.json package.json.backup && \
+    node -e "
+      const fs = require('fs');
+      const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+      
+      // Add missing export paths that are imported by generated server code
+      const additionalExports = {
+        './server/jobs': './dist/server/jobs/index.js',
+        './server/jobs/core/pgBoss': './dist/server/jobs/core/pgBoss/index.js',
+        './server/auth': './dist/server/auth/index.js'
+      };
+      
+      // Merge with existing exports
+      Object.assign(pkg.exports, additionalExports);
+      
+      fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+      console.log('Fixed wasp package.json with missing exports');
+    " && \
+    echo "--- Updated wasp package.json exports ---" && \
+    cat package.json | grep -A5 -B5 '"./server"'
 
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
