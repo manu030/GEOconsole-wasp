@@ -46,6 +46,12 @@ RUN npm ci
 COPY --from=wasp-builder /build/.wasp/build/server/src ./src
 COPY --from=wasp-builder /build/.wasp/build/db ./db
 
+# Copy user source files and fix the import path in the generated job file
+COPY --from=wasp-builder /build/src ./user-src
+
+# Fix the incorrect import path in the generated job file
+RUN sed -i 's|../../../../../src/analytics/stats|../user-src/analytics/stats|g' src/jobs/dailyStatsJob.ts
+
 # Install Prisma client and CLI, then generate client
 RUN npm install @prisma/client@5.19.1 prisma@5.19.1
 
