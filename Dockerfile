@@ -53,6 +53,20 @@ COPY --from=wasp-builder /build/src ./user-src
 # Copy Wasp SDK package for runtime (bundle contains imports that need resolution)
 COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./node_modules/wasp
 
+# Debug: Verify wasp package structure and permissions
+RUN echo "=== Debugging wasp package structure ===" && \
+    ls -la ./node_modules/ && \
+    echo "--- wasp directory contents ---" && \
+    ls -la ./node_modules/wasp/ && \
+    echo "--- wasp package.json exists? ---" && \
+    test -f ./node_modules/wasp/package.json && echo "package.json exists" || echo "package.json MISSING" && \
+    echo "--- wasp package.json contents ---" && \
+    cat ./node_modules/wasp/package.json | head -20 && \
+    echo "--- wasp dist directory ---" && \
+    ls -la ./node_modules/wasp/dist/ 2>/dev/null || echo "dist directory missing" && \
+    echo "--- wasp src directory ---" && \
+    ls -la ./node_modules/wasp/src/ 2>/dev/null || echo "src directory missing"
+
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
     file="$1"; \
