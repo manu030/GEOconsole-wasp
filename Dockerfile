@@ -33,6 +33,9 @@ COPY --from=wasp-builder /build/.wasp/build/server/package*.json ./
 COPY --from=wasp-builder /build/.wasp/build/server/tsconfig.json ./
 COPY --from=wasp-builder /build/.wasp/build/server/rollup.config.js ./
 
+# Copy root tsconfig.json for project references
+COPY --from=wasp-builder /build/tsconfig.json /tsconfig.json
+
 # Install dependencies (including devDependencies for build process)
 RUN npm ci
 
