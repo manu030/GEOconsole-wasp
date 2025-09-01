@@ -72,8 +72,7 @@ RUN npx prisma generate --schema=./db/schema.prisma
 # Build the server bundle (TypeScript compilation + Rollup)
 RUN npm run bundle
 
-# Clean up dev dependencies (after build is complete)
-RUN npm prune --production
+# Note: We keep all dependencies because Wasp modules are needed at runtime
 
 # Expose port
 EXPOSE 3000
