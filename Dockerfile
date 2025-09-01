@@ -51,7 +51,7 @@ COPY --from=wasp-builder /build/.wasp/build/db ./db
 COPY --from=wasp-builder /build/src ./user-src
 
 # Copy Wasp SDK modules that are needed at runtime
-COPY --from=wasp-builder /build/.wasp/build/server/node_modules/wasp ./node_modules/wasp
+COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./node_modules/wasp
 
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
