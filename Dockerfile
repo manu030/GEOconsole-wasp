@@ -50,15 +50,21 @@ COPY --from=wasp-builder /build/.wasp/build/db ./db
 # Copy user source files and fix the import path in the generated job file
 COPY --from=wasp-builder /build/src ./user-src
 
-# Copy Wasp SDK package for runtime (bundle contains imports that need resolution)
-COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./node_modules/wasp
+# Copy Wasp SDK package to a temporary location and install it properly
+COPY --from=wasp-builder /build/.wasp/build/sdk/wasp ./wasp-temp
 
 # Fix wasp package.json by adding missing export paths that are imported by the generated code
-RUN cd ./node_modules/wasp && \
+# Fix wasp package.json and install it properly
+RUN cd ./wasp-temp && \
     cp package.json package.json.backup && \
     node -e 'const fs = require("fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); const additionalExports = { "./server/jobs": "./dist/server/jobs/index.js", "./server/jobs/core/pgBoss": "./dist/server/jobs/core/pgBoss/index.js", "./server/auth": "./dist/server/auth/index.js", "./server/utils": "./dist/server/utils.js", "./server/middleware": "./dist/server/middleware/index.js", "./server/auth/email": "./dist/server/auth/email/index.js", "./server/auth/email/utils": "./dist/server/auth/email/utils.js", "./server/email/core/types": "./dist/server/email/core/types.js", "./core/serialization": "./dist/core/serialization/index.js", "./core/auth": "./dist/core/auth.js", "./auth/user": "./dist/auth/user.js", "./auth/utils": "./dist/auth/utils.js", "./auth/session": "./dist/auth/session.js", "./auth/password": "./dist/auth/password.js", "./auth/validation": "./dist/auth/validation.js", "./auth/jwt": "./dist/auth/jwt.js", "./auth/providers/types": "./dist/auth/providers/types.js" }; Object.assign(pkg.exports, additionalExports); fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2)); console.log("Fixed wasp package.json with missing exports");' && \
-    echo "--- Updated wasp package.json exports ---" && \
-    cat package.json | grep -A5 -B5 '"./server"'
+    cd /app && \
+    echo "--- Installing wasp package properly ---" && \
+    npm install ./wasp-temp --no-save && \
+    rm -rf ./wasp-temp && \
+    echo "--- Verifying wasp package installation ---" && \
+    ls -la ./node_modules/wasp/ && \
+    test -f ./node_modules/wasp/package.json && echo "✓ wasp package.json exists" || echo "✗ wasp package.json missing"
 
 # Fix all incorrect import paths in generated TypeScript files with proper path calculation
 RUN find src -name "*.ts" -exec sh -c '\
