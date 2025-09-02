@@ -86,7 +86,17 @@ RUN npm install -D typescript@5.8.2
 RUN npx prisma generate --schema=./db/schema.prisma
 
 # Fix Rollup config to bundle wasp package instead of treating it as external
-RUN sed -i "s|external: /node_modules/,|external: (id) => /node_modules/.test(id) \&\& !/node_modules\\/wasp/.test(id),|" rollup.config.js && \
+RUN cat > fix-rollup.js << 'EOF'
+const fs = require('fs');
+const content = fs.readFileSync('rollup.config.js', 'utf8');
+const fixed = content.replace(
+  'external: /node_modules/',
+  'external: (id) => /node_modules/.test(id) && !/node_modules\\/wasp/.test(id)'
+);
+fs.writeFileSync('rollup.config.js', fixed);
+console.log('Fixed rollup.config.js to bundle wasp package');
+EOF
+RUN node fix-rollup.js && rm fix-rollup.js && \
     echo "--- Modified rollup.config.js to bundle wasp package ---" && \
     grep -A2 -B2 "external:" rollup.config.js
 
