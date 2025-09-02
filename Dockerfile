@@ -85,6 +85,11 @@ RUN npm install -D typescript@5.8.2
 # Generate Prisma client with proper working directory context
 RUN npx prisma generate --schema=./db/schema.prisma
 
+# Fix Rollup config to bundle wasp package instead of treating it as external
+RUN sed -i "s|external: /node_modules/,|external: (id) => /node_modules/.test(id) \&\& !/node_modules\\/wasp/.test(id),|" rollup.config.js && \
+    echo "--- Modified rollup.config.js to bundle wasp package ---" && \
+    grep -A2 -B2 "external:" rollup.config.js
+
 # Build the server bundle (TypeScript compilation + Rollup)
 RUN npm run bundle
 
